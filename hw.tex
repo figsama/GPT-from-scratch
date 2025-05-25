@@ -145,24 +145,26 @@ For training process monitoring, we adopted a multi-level recording strategy: at
     \label{fig:training_loss}
 \end{figure}
 
-From the training curves shown in Figure~\ref{fig:training_loss}, we can observe distinct learning behaviors across the three architectures. The Transformer model demonstrates remarkably efficient learning dynamics, with its loss rapidly decreasing from an initial value of 6.55 to 4.08 within the first 35 epochs, and ultimately stabilizing around 4.0 by epoch 40. This rapid convergence can be attributed to the parallel nature of the self-attention mechanism, which allows the model to efficiently capture both local and global dependencies in the input sequence. The LSTM model shows a more gradual but steady improvement pattern, with its loss curve exhibiting a smooth descent trajectory throughout the training process. The RNN model, while achieving reasonable performance, displays the most conservative learning progression among the three, which aligns with its simpler architectural design and limited ability to maintain long-term dependencies.
+From the training curves shown in Figure~\ref{fig:training_loss}, we can observe distinct learning behaviors across the three architectures. The Transformer model demonstrates remarkably efficient learning dynamics, with its loss rapidly decreasing from an initial value of 6.55 to 3.99 within 40 epochs. This rapid convergence can be attributed to the parallel nature of the self-attention mechanism, which allows the model to efficiently capture both local and global dependencies in the input sequence. The RNN model shows surprisingly good performance, with its loss steadily decreasing from 6.63 to 4.51, outperforming the LSTM model which achieves a final loss of 5.02 from an initial value of 6.82. This suggests that in our specific setup, the simpler RNN architecture might be more effective at capturing the underlying patterns in the data.
 
 \section{Model Comparison and Domain Transfer (Part B)}
 
 \subsection{Model Performance Comparison Analysis}
 
-In perplexity evaluation, the three models showed distinctive characteristics on the WikiText-2 dataset. As illustrated in Figure~\ref{fig:perplexity}, the Transformer model demonstrated optimal performance with a validation set perplexity of 346.8285, significantly outperforming LSTM (390.0218) and RNN (411.1751). This difference mainly stems from the Transformer's advantage in modeling long-distance dependencies, as its self-attention mechanism allows the model to directly attend to any position in the sequence.
+In perplexity evaluation, the three models showed distinctive characteristics on the WikiText-2 dataset. As illustrated in Figure~\ref{fig:perplexity}, the Transformer model demonstrated optimal performance with a validation set perplexity of 99.24, significantly outperforming both LSTM (168.10) and RNN (140.07). This difference mainly stems from the Transformer's advantage in modeling long-distance dependencies, as its self-attention mechanism allows the model to directly attend to any position in the sequence.
+
+
+The perplexity metrics reveal a clear hierarchy in model capabilities, with the Transformer's perplexity being approximately 41.0\% lower than LSTM and 29.2\% lower than RNN. This quantitative difference is particularly noteworthy given that all models were trained under identical conditions and data constraints. Interestingly, the RNN model showed better performance than LSTM with a perplexity of 140.07, demonstrating that simpler architectures can sometimes be more effective in certain scenarios. The LSTM's higher perplexity of 168.10 suggests that its gating mechanisms might require more careful tuning or longer training time to reach optimal performance.
+
 
 \begin{figure}[!htb]
-    \centering
-    \subfigure[Transformer Model]{\includegraphics[width=0.45\textwidth]{plots/B/transformer_perplexity_valid.png}}
-    \subfigure[LSTM Model]{\includegraphics[width=0.45\textwidth]{plots/B/lstm_perplexity_valid.png}}
-    \subfigure[RNN Model]{\includegraphics[width=0.45\textwidth]{plots/B/rnn_perplexity_valid.png}}
-    \caption{Validation Perplexity for Different Models. The Transformer achieves the lowest perplexity (346.83), followed by LSTM (390.02) and RNN (411.18), demonstrating the effectiveness of attention mechanisms in language modeling tasks.}
-    \label{fig:perplexity}
+  \centering
+  \subfigure[Transformer Model]{\includegraphics[width=0.45\textwidth]{plots/B/transformer_perplexity_valid.png}}
+  \subfigure[LSTM Model]{\includegraphics[width=0.45\textwidth]{plots/B/lstm_perplexity_valid.png}}
+  \subfigure[RNN Model]{\includegraphics[width=0.45\textwidth]{plots/B/rnn_perplexity_valid.png}}
+  \caption{Validation Perplexity for Different Models. The Transformer achieves the lowest perplexity (99.24), followed by RNN (140.07) and LSTM (168.10), demonstrating the effectiveness of attention mechanisms in language modeling tasks.}
+  \label{fig:perplexity}
 \end{figure}
-
-The perplexity metrics reveal a clear hierarchy in model capabilities, with the Transformer's perplexity being approximately 11.1\% lower than LSTM and 15.6\% lower than RNN. This quantitative difference is particularly noteworthy given that all models were trained under identical conditions and data constraints. The LSTM's intermediate performance, with a perplexity of 390.02, demonstrates the effectiveness of its gating mechanisms in capturing medium-range dependencies, while still falling short of the Transformer's global attention capabilities. The RNN's higher perplexity of 411.18, while still respectable, reflects its architectural limitations in maintaining coherent long-range relationships in the text.
 
 \FloatBarrier  % 确保图片不会跑到后面去
 
@@ -235,12 +237,12 @@ The fine-tuning process used a small learning rate (2e-5) to maintain the pre-tr
 
 From the fine-tuning process's loss curve in Figure~\ref{fig:finetune_loss}, we can observe significant convergence trends:
 \begin{itemize}
-\item Initial phase (0-100 steps): Loss value rapidly decreases from initial 3.09, indicating the model is quickly adapting to new domain features.
-\item Middle phase (100-300 steps): Loss continues to steadily decrease from 2.74 to 2.46, though at a slower rate, reflecting more detailed parameter adjustments.
-\item Later phase (300-600 steps): Loss value gradually stabilizes around 2.25, indicating the model has well-adapted to the target domain's features.
+\item Initial phase (0-100 steps): Loss value starts at 3.09, indicating the model's initial adaptation to the new domain.
+\item Middle phase (100-300 steps): Loss continues to steadily decrease from 2.74 to 2.46, reflecting gradual parameter adjustments.
+\item Later phase (300-600 steps): Loss value gradually stabilizes around 2.25, indicating the model has adapted to the target domain's features.
 \end{itemize}
 
-This loss curve pattern indicates successful fine-tuning, with the model effectively learning medical domain-specific knowledge while maintaining its original knowledge. This is also reflected in the significant perplexity improvement: from 28.32 before fine-tuning to 8.78 after, indicating substantially improved prediction accuracy in the target domain.
+This loss curve pattern indicates successful fine-tuning, with the model effectively learning medical domain-specific knowledge while maintaining its original capabilities. However, more extensive training and evaluation would be needed to fully assess the model's performance in the medical domain.
 
 \subsection{Generation Effect Comparison}
 
@@ -262,7 +264,16 @@ METHODS: A retrospective cohort study was conducted in the Netherlands. Patients
 RESULTS: The mean age of the patients was 43.5 years (range, 30-54 years).
 \end{lstlisting}
 
-Comparing the two generation results, we can observe significant improvements. The fine-tuned model demonstrates higher professionalism, generating content that matches medical literature style, including methodological descriptions and specific statistical data. In terms of structure, the generated text completely follows the standard academic paper format, including key sections like purpose, methods, and results, which are typical characteristics of medical literature. Meanwhile, fine-tuning has significantly improved the model's repetition issues, with post-fine-tuning output being richer and more diverse compared to the simple repetitive expressions before fine-tuning. In terms of domain adaptability, the model shows the ability to accurately use medical terminology and concepts, such as appropriate use of professional terms like ``retrospective cohort study'' and ``SARS-CoV-2'', indicating the model has well-mastered the target domain's professional language.
+Comparing the two generation results, we can observe some improvements after fine-tuning. While the pre-fine-tuning model shows significant repetition issues ("It is a virus that is present in the human body" repeated multiple times), the fine-tuned model produces slightly more varied output. However, the improvements are modest:
+
+\begin{itemize}
+\item \textbf{Content Relevance}: The fine-tuned model attempts to follow a more academic structure, though the content is not always coherent or accurate.
+\item \textbf{Repetition}: While better than the pre-fine-tuning version, the model still shows some tendency towards repetitive patterns.
+\item \textbf{Domain Adaptation}: The model shows basic recognition of medical terminology, but the usage is not always contextually appropriate.
+\item \textbf{Limitations}: The generated text often lacks deep medical knowledge and sometimes produces inconsistent or incorrect medical statements.
+\end{itemize}
+
+These results suggest that while fine-tuning provides some improvements, more extensive training, larger medical datasets, and possibly more sophisticated fine-tuning approaches would be needed for truly robust medical domain adaptation.
 
 \section{Future Improvement Directions}
 
